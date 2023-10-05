@@ -1,10 +1,16 @@
 import { StyleSheet, Text, View } from 'react-native';
-import CameraScreen from "./screen/CameraScreen"
+import { NavigationContainer } from '@react-navigation/native';
+import CameraScreen from './screen/CameraScreen';
+import Navigation from './Navigation';
+
+
 
 export default function App() {
   
   return (
-    <CameraScreen/>
+    <NavigationContainer>
+      <Navigation/>
+    </NavigationContainer>
   );
 }
 

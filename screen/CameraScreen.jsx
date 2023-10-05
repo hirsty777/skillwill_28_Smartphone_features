@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { StatusBar } from 'expo-status-bar';
+import { Image, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View, StatusBar } from 'react-native'
+import { useNavigation, StackActions } from '@react-navigation/native';
 import { Camera, CameraType, FlashMode } from "expo-camera"
 import { Ionicons } from '@expo/vector-icons';
 import CameraBTN from '../components/CameraBTN';
-
+import { useIsFocused } from '@react-navigation/native';
 
 
 export default function CameraScreen() {
@@ -13,6 +13,8 @@ export default function CameraScreen() {
     const [mainCamera, setMainCamera] = useState(true)
     const [capturedPic, setCapturedPic] = useState(null)
     const cameraRef = useRef(null)
+    const {navigate,dispatch} = useNavigation();
+
   
     useEffect(()=>{
       (async () => {
@@ -31,9 +33,12 @@ export default function CameraScreen() {
         setCapturedPic(photo.uri)
       }
     }
-
     const changeCamera = () => {
       setMainCamera(prev=>!prev)
+    }
+
+    const goToImageScreen = () => {
+      if(capturedPic)dispatch(StackActions.replace('Image Screen', {capturedPic}))
     }
     
     return (
@@ -43,12 +48,11 @@ export default function CameraScreen() {
         <View style={styles.topContainer}>
           <Ionicons name={flashStatus ? "flash" : "flash-off"} size={24} color="white" onPress={flashOnPress}/>
         </View>
-
-      {/*👇 Mid Part*/}
+      {/*👇 Mid Part ( Camera Area )*/}
         <View style={styles.midContainer}>
           {cameraPermision ? 
             <Camera 
-              style={{width:400,height:400}} 
+              style={styles.cameraStyles}
               ref={cameraRef} 
               type={mainCamera ? CameraType.back : CameraType.front} 
               flashMode={flashStatus ? FlashMode.torch : FlashMode.off} 
@@ -59,11 +63,15 @@ export default function CameraScreen() {
 
       {/*👇 Bot Part*/}
         <View style={styles.botContainer}>
-          {capturedPic ? 
-            <Image source={{uri:capturedPic,width:50,height:50}} style={{borderWidth:0.3,borderColor:"#F7F7F76B",borderRadius:8}}/> 
-              : <View style={{width:50,height:50,borderWidth:1,borderColor:"white"}}></View>}
-          {/* custom  btn 👇*/}
+          {/* last taken picture 👇*/}
+          <TouchableHighlight onPress={goToImageScreen}>
+            {capturedPic ? 
+            <Image source={{uri:capturedPic,width:50,height:50}} style={styles.caputerdImg}/> 
+              : <View style={styles.caputerdImg}></View>}
+          </TouchableHighlight>
+          {/* Custom  btn  ( Take picture )👇*/}
           <CameraBTN takePicOnPress={takePic} />
+          {/* Rotate camera btn  👇*/}
           <TouchableOpacity style={{backgroundColor:"#171a27",padding:5,borderRadius:20}} onPress={changeCamera}>
             <Ionicons name="ios-sync" size={30} color="white" />
           </TouchableOpacity>
@@ -77,11 +85,11 @@ export default function CameraScreen() {
 const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#000000',
+      backgroundColor: '#000000FF',
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingTop:5,
-      paddingBottom:"15%"
+      paddingBottom:"15%",
     },
     topContainer:{
       width:"100%",
@@ -89,13 +97,15 @@ const styles = StyleSheet.create({
       justifyContent:"start",
       alignItems:"start",
       paddingLeft:10,
-      paddingRight:10
+      paddingRight:10,
+      paddingTop:5
     },
     midContainer:{
       flexDirection:"column",
       justifyContent:"center",
       alignItems:"center",
-      rowGap:8
+      rowGap:8,
+      width:"100%",height:"70%"
     },
     botContainer:{
       width:"100%",
@@ -104,5 +114,14 @@ const styles = StyleSheet.create({
       alignItems:"center",
       paddingLeft:10,
       paddingRight:10,
+    },
+    cameraStyles:{
+      width:"100%",height:"95%"
+    },
+    caputerdImg:{
+      width:50,height:50,
+      borderWidth:0.3,
+      borderColor:"#F7F7F76B",
+      borderRadius:8
     }
 })
